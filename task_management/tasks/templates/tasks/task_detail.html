@@ -1,0 +1,36 @@
+{% block content %}
+  <h1>{{ task.title }}</h1>
+  <p><strong>Описание:</strong> {{ task.description }}</p>
+  <p><strong>Исполнитель:</strong> {{ task.assignee.username }}</p>
+  <p><strong>Статус:</strong> {{ task.get_status_display }}</p>
+  <p><strong>Дата завершения:</strong> {{ task.due_date }}</p>
+
+  <h2>Комментарии</h2>
+  <ul>
+    {% for comment in task.comments.all %}
+      <li>
+        <strong>{{ comment.user.username }}:</strong> {{ comment.text }} 
+        <em>({{ comment.created_at }})</em>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h3>Добавить комментарий</h3>
+  <form method="post" action="{% url 'add_comment' task.id %}">
+    {% csrf_token %}
+    <textarea name="comment" rows="4" cols="50" required></textarea><br>
+    <button type="submit">Добавить комментарий</button>
+  </form>
+
+  <h3>Изменить статус задачи</h3>
+  <form method="post" action="{% url 'update_task_status' task.id %}">
+    {% csrf_token %}
+    <select name="status">
+      <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>В процессе</option>
+      <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Завершено</option>
+    </select>
+    <button type="submit">Обновить статус</button>
+  </form>
+
+  <a href="{% url 'task_list' %}">Назад к списку задач</a>
+{% endblock %}
