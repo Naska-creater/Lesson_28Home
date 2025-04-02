@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import DetailView
@@ -12,10 +14,14 @@ class TaskView(View):
         tasks = Task.objects.all().order_by('-created_at')
         return render(request, 'tasks/task_list.html', {'tasks': tasks})
 
-class TaskCreateView(View):
+
+class TaskCreateView(LoginRequiredMixin,View):
+    login_url = 'login'
+
     def get(self, request):
         form = TaskForm()
         return render(request, 'tasks/create_task.html', {'form': form})
+
 
     def post(self, request):
         form = TaskForm(request.POST)
@@ -30,7 +36,10 @@ class TaskDetailView(DetailView):
     template_name = 'tasks/task_detail.html'
     context_object_name = 'task'
 
-class TaskUpdateStatusView(View):
+
+class TaskUpdateStatusView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def post(self, request, pk):
         task = get_object_or_404(Task, pk=pk)
         new_status = request.POST.get('status')
@@ -42,7 +51,10 @@ class TaskUpdateStatusView(View):
 
         return redirect('task_detail', pk=task.pk)
 
-class CommentCreateView(View):
+
+class CommentCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
         form = CommentForm(request.POST)
@@ -53,3 +65,4 @@ class CommentCreateView(View):
             comment.save()
             return redirect('task_detail', task_id=task.id)
         return redirect('task_detail', task_id=task.id)
+
